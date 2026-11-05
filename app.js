@@ -1,37 +1,62 @@
-// Loads every post listed in posts/posts.json and puts it on the wall, newest first.
-// Each post is a plain HTML file you write yourself in the posts/ folder.
+// Finds every .html file in the posts/ folder automatically (via GitHub's public API)
+// and puts it on the wall, newest first. No list to keep up to date.
+//
+// Optional first line of a post, to set its date and author:
+//   <!-- date: 2004-02-10 18:00 | author: You -->
+
+const REPO = 'lana6478/Facebook-2';
+const BRANCH = 'main';
 
 async function loadWall() {
   const wall = document.getElementById('wall');
   try {
-    const res = await fetch('posts/posts.json', { cache: 'no-store' });
-    const posts = await res.json();
-    posts.sort((a, b) => (a.date < b.date ? 1 : -1));
+    const res = await fetch(`https://api.github.com/repos/${REPO}/contents/posts?ref=${BRANCH}`);
+    if (!res.ok) throw new Error('GitHub API ' + res.status);
+    const files = (await res.json()).filter(f => f.type === 'file' && f.name.endsWith('.html'));
 
-    const html = await Promise.all(posts.map(async (p) => {
-      const r = await fetch('posts/' + p.file, { cache: 'no-store' });
-      const body = r.ok ? await r.text() : '<p><i>Missing file: ' + p.file + '</i></p>';
-      return `
-        <div class="post">
-          <div class="post-meta"><b>${p.author || 'You'}</b> wrote at ${formatDate(p.date)}</div>
-          <div class="post-body">${body}</div>
-        </div>`;
+    const posts = await Promise.all(files.map(async (f) => {
+      const r = await fetch(f.download_url, { cache: 'no-store' });
+      const html = r.ok ? await r.text() : '<p><i>Couldn\'t load ' + f.name + '</i></p>';
+      return { name: f.name, html, ...readMeta(html) };
     }));
 
-    wall.innerHTML = html.join('') || '<p class="loading">No posts yet.</p>';
+    // Newest first: by date when both posts have one, otherwise by filename (higher number = newer).
+    posts.sort((a, b) => (a.date && b.date) ? b.date.localeCompare(a.date) : b.name.localeCompare(a.name));
+
+    wall.innerHTML = posts.map(p => `
+      <div class="post">
+        <div class="post-meta"><b>${escapeHtml(p.author || 'You')}</b> wrote${p.date ? ' at ' + formatDate(p.date) : ''}</div>
+        <div class="post-body">${p.html}</div>
+      </div>`).join('') || '<p class="loading">No posts yet.</p>';
+
     document.getElementById('post-count').textContent = `(${posts.length})`;
-    if (posts[0]) document.getElementById('p-updated').textContent = formatDate(posts[0].date);
+    const dated = posts.find(p => p.date);
+    if (dated) document.getElementById('p-updated').textContent = formatDate(dated.date);
   } catch (e) {
-    wall.innerHTML = '<p class="error">Couldn\'t load posts. If you opened index.html straight from your computer, ' +
-      'view it through GitHub Pages or a local server instead (browsers block fetch on file://).</p>';
+    wall.innerHTML = '<p class="error">Couldn\'t load posts right now. Try refreshing in a minute.</p>';
   }
 }
 
+function readMeta(html) {
+  const m = html.match(/<!--([\s\S]*?)-->/);
+  if (!m) return {};
+  const meta = {};
+  m[1].split('|').forEach(part => {
+    const [k, ...v] = part.split(':');
+    if (k && v.length) meta[k.trim().toLowerCase()] = v.join(':').trim();
+  });
+  return { date: meta.date, author: meta.author };
+}
+
 function formatDate(d) {
-  const dt = new Date(d);
+  const dt = new Date(d.replace(' ', 'T'));
   return isNaN(dt) ? d : dt.toLocaleString('en-US', {
     month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit'
   });
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 loadWall();

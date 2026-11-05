@@ -4,19 +4,22 @@ A retro recreation of a 2004-era college social network: blue header bar, Tahoma
 
 ## Adding a post
 
-1. Create a new file in `posts/`, e.g. `posts/003-my-post.html`, and type any HTML you like.
-2. Add a line for it in `posts/posts.json`:
+Create a new `.html` file in `posts/` (e.g. `posts/004-my-post.html`) and type any HTML you like.
+It appears on the Wall automatically — there's no list to update.
 
-```json
-{ "file": "003-my-post.html", "date": "2004-02-10T18:00", "author": "You" }
+Optionally, make the first line a comment giving its date and author:
+
+```html
+<!-- date: 2004-02-10 18:00 | author: You -->
+<p>My post goes here.</p>
 ```
 
-Posts show newest first. Your profile details are in `index.html`; swap `img/profile.svg` for your own photo.
+Posts are shown newest date first; posts without a date are ordered by filename, highest number first.
+Your profile details are in `index.html`; swap `img/profile.svg` for your own photo.
 
 ## Viewing it
 
 Turn on GitHub Pages (Settings → Pages → Deploy from branch → `main` / root). The site will be at
 `https://<your-username>.github.io/Facebook-2/`.
 
-Opening `index.html` straight from your computer won't load posts (browsers block that); use GitHub Pages
-or run `python3 -m http.server` in this folder and visit http://localhost:8000.
+The Wall reads the posts folder from GitHub, so new posts show up once they're committed to `main`.
