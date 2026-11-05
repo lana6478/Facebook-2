@@ -24,3 +24,9 @@ Turn on GitHub Pages (Settings → Pages → Deploy from branch → `main` / roo
 `https://<your-username>.github.io/Facebook-2/`.
 
 The Wall reads the posts folder from GitHub, so new posts show up once they're committed to `main`.
+
+## Accounts and posting from the page (optional)
+
+The `pocketbase` branch adds sign-up, login and a "Write something…" box, backed by a
+PocketBase server you run yourself. Setup steps are in [`server/SETUP.md`](server/SETUP.md).
+Until `SERVER_URL` is set in `config.js`, the site works exactly as before.
