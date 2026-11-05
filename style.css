@@ -19,20 +19,8 @@ a:hover { text-decoration: underline; }
 }
 .logo { color: #fff; font-size: 20px; font-weight: bold; letter-spacing: -1px; }
 .logo:hover { text-decoration: none; }
-.toplinks a { color: #fff; margin-left: 10px; font-weight: bold; }
 
-#body { display: flex; gap: 10px; padding: 10px; }
-#sidebar { width: 140px; flex-shrink: 0; }
-#content { flex: 1; min-width: 0; }
-
-.quicksearch { display: flex; gap: 3px; margin-bottom: 10px; }
-.quicksearch input { width: 90px; font-size: 11px; border: 1px solid #bdc7d8; padding: 2px; }
-.quicksearch button {
-  font-size: 11px; background: #3b5998; color: #fff;
-  border: 1px solid #29447e; cursor: pointer;
-}
-.navlinks { list-style: none; margin: 0; padding: 0; }
-.navlinks li { padding: 3px 0; border-bottom: 1px solid #eee; }
+#body { padding: 10px; }
 
 .box { border: 1px solid #b7b7b7; margin-bottom: 10px; }
 .boxhead {
@@ -56,10 +44,4 @@ a:hover { text-decoration: underline; }
 .loading, .error { padding: 10px; color: #808080; }
 
 #footer { text-align: center; color: #808080; padding: 15px; border-top: 1px solid #ddd; line-height: 1.8; }
-#footer a { margin: 0 4px; }
 
-@media (max-width: 600px) {
-  #body { flex-direction: column; }
-  #sidebar { width: auto; }
-  .toplinks a { margin: 0 8px 0 0; }
-}
