@@ -34,8 +34,41 @@
           </div>
         </div>
 
+        <div class="box" id="account" hidden>
+          <div class="boxhead" id="account-head">Log In</div>
+
+          <form id="login-form" class="form">
+            <label>Email: <input type="email" name="email" required autocomplete="email"></label>
+            <label>Password: <input type="password" name="password" required autocomplete="current-password"></label>
+            <div class="form-row">
+              <button type="submit">Login</button>
+              or <a href="#" data-show="signup-form">register</a>
+            </div>
+          </form>
+
+          <form id="signup-form" class="form" hidden>
+            <label>Name: <input type="text" name="name" required maxlength="50" autocomplete="name"></label>
+            <label>Email: <input type="email" name="email" required autocomplete="email"></label>
+            <label>Password: <input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
+            <div class="form-row">
+              <button type="submit">Register Now!</button>
+              or <a href="#" data-show="login-form">log in</a>
+            </div>
+          </form>
+
+          <div id="logged-in" class="form" hidden>
+            <div class="form-row">Logged in as <b id="me-name"></b> [ <a href="#" id="logout">logout</a> ]</div>
+          </div>
+
+          <p id="account-msg" class="msg" hidden></p>
+        </div>
+
         <div class="box">
           <div class="boxhead">The Wall <span id="post-count"></span></div>
+          <form id="composer" class="composer" hidden>
+            <textarea name="body" rows="3" maxlength="5000" required placeholder="Write something… (HTML allowed)"></textarea>
+            <div class="form-row"><button type="submit">Post</button></div>
+          </form>
           <div id="wall"><p class="loading">Loading posts…</p></div>
         </div>
       </div>
@@ -45,6 +78,9 @@
       a retro project &copy; 2004
     </div>
   </div>
+  <script src="config.js"></script>
+  <script src="lib/purify.min.js"></script>
+  <script src="lib/pocketbase.umd.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

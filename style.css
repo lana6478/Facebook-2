@@ -45,3 +45,25 @@ a:hover { text-decoration: underline; }
 
 #footer { text-align: center; color: #808080; padding: 15px; border-top: 1px solid #ddd; line-height: 1.8; }
 
+
+/* Login, register and "write something" boxes */
+[hidden] { display: none !important; }
+.form { padding: 8px 10px; }
+.form label { display: block; margin-bottom: 6px; color: #808080; }
+.form input {
+  display: block; width: 100%; max-width: 260px; box-sizing: border-box; margin-top: 2px;
+  font: inherit; font-size: 16px; border: 1px solid #bdc7d8; padding: 3px;
+}
+.form-row { margin-top: 4px; }
+button {
+  font: inherit; font-weight: bold; background: #3b5998; color: #fff;
+  border: 1px solid #29447e; padding: 3px 10px; cursor: pointer;
+}
+button:disabled { opacity: .6; }
+.msg { padding: 0 10px 8px; margin: 0; color: #3b5998; }
+.msg.error, p.error { color: #b00; }
+.composer { padding: 8px 10px; border-bottom: 1px solid #e5e5e5; background: #f7f7f7; }
+.composer textarea {
+  width: 100%; box-sizing: border-box; font: inherit; font-size: 16px;
+  border: 1px solid #bdc7d8; padding: 4px; resize: vertical;
+}
