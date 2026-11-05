@@ -8,7 +8,7 @@
 // the repo on GitHub doesn't break anything. Falls back to this when viewed elsewhere.
 const REPO = (location.hostname.endsWith('.github.io') && location.pathname.split('/')[1])
   ? `${location.hostname.split('.')[0]}/${location.pathname.split('/')[1]}`
-  : 'lana6478/blogbook';
+  : 'lana6478/theblogbook';
 const BRANCH = 'main';
 
 const pb = window.SERVER_URL ? new PocketBase(window.SERVER_URL) : null;
