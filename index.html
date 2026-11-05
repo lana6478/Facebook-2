@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>[ thequadbook ]</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="page">
+    <div id="header">
+      <a href="index.html" class="logo">[ thequadbook ]</a>
+      <div class="toplinks">
+        <a href="index.html">home</a>
+        <a href="#">search</a>
+        <a href="#">global</a>
+        <a href="#">social net</a>
+        <a href="#">invite</a>
+        <a href="#">faq</a>
+        <a href="#">logout</a>
+      </div>
+    </div>
+
+    <div id="body">
+      <div id="sidebar">
+        <form class="quicksearch" onsubmit="return false">
+          <input type="text" placeholder="quick search">
+          <button>go</button>
+        </form>
+        <ul class="navlinks">
+          <li><a href="#">My Profile</a> [ <a href="#">edit</a> ]</li>
+          <li><a href="#">My Friends</a></li>
+          <li><a href="#">My Groups</a></li>
+          <li><a href="#">My Parties</a></li>
+          <li><a href="#">My Messages</a></li>
+          <li><a href="#">My Account</a></li>
+          <li><a href="#">My Privacy</a></li>
+        </ul>
+      </div>
+
+      <div id="content">
+        <div class="box">
+          <div class="boxhead">Profile</div>
+          <div class="profile">
+            <div class="photo">
+              <img src="img/profile.svg" alt="Profile picture">
+            </div>
+            <table class="info">
+              <tr><th>Name:</th><td id="p-name">Your Name</td></tr>
+              <tr><th>Member Since:</th><td>February 4, 2004</td></tr>
+              <tr><th>Last Update:</th><td id="p-updated">—</td></tr>
+              <tr><th>School:</th><td>Your University '07</td></tr>
+              <tr><th>Status:</th><td>Student</td></tr>
+              <tr><th>Concentration:</th><td>Computer Science</td></tr>
+              <tr><th>Residence:</th><td>Dorm Room 33</td></tr>
+              <tr><th>Looking For:</th><td>Friendship, Whatever I can get</td></tr>
+              <tr><th>Relationship Status:</th><td>It's Complicated</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="box">
+          <div class="boxhead">The Wall <span id="post-count"></span></div>
+          <div id="wall"><p class="loading">Loading posts…</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="footer">
+      <a href="#">about</a> <a href="#">contact</a> <a href="#">faq</a> <a href="#">terms</a> <a href="#">privacy</a>
+      <br>a retro project &copy; 2004
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
