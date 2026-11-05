@@ -4,7 +4,11 @@
 //  2. Posts people write on the page itself, stored on your PocketBase server.
 //     These only appear when SERVER_URL is set in config.js.
 
-const REPO = 'lana6478/Facebook-2';
+// Works out the repo from the site's own address (user.github.io/repo), so renaming
+// the repo on GitHub doesn't break anything. Falls back to this when viewed elsewhere.
+const REPO = (location.hostname.endsWith('.github.io') && location.pathname.split('/')[1])
+  ? `${location.hostname.split('.')[0]}/${location.pathname.split('/')[1]}`
+  : 'lana6478/blogbook';
 const BRANCH = 'main';
 
 const pb = window.SERVER_URL ? new PocketBase(window.SERVER_URL) : null;

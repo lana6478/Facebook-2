@@ -1,4 +1,4 @@
-# Facebook 2
+# Blogbook
 
 A retro recreation of a 2004-era college social network: blue header bar, Tahoma 11px, profile box and a wall of posts.
 
@@ -21,7 +21,7 @@ Your profile details are in `index.html`; swap `img/profile.svg` for your own ph
 ## Viewing it
 
 Turn on GitHub Pages (Settings → Pages → Deploy from branch → `main` / root). The site will be at
-`https://<your-username>.github.io/Facebook-2/`.
+`https://<your-username>.github.io/blogbook/`.
 
 The Wall reads the posts folder from GitHub, so new posts show up once they're committed to `main`.
 
