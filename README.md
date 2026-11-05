@@ -7,7 +7,8 @@ A retro recreation of a 2004-era college social network: blue header bar, Tahoma
 Create a new `.html` file in `posts/` (e.g. `posts/004-my-post.html`) and type any HTML you like.
 It appears on the Wall automatically — there's no list to update.
 
-Optionally, make the first line a comment giving its date and author:
+Each post gets a date line added automatically (the time you committed it) a few seconds after you add it.
+You can also write the line yourself to choose the date or author:
 
 ```html
 <!-- date: 2004-02-10 18:00 | author: You -->

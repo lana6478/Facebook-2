@@ -1,0 +1,30 @@
+name: Date new posts
+
+# Runs whenever a post is added or changed on main, and stamps any post
+# that doesn't have a date line with the time it was committed.
+on:
+  push:
+    branches: [main]
+    paths: ['posts/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  date-posts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: stamp
+        run: bash .github/scripts/date-posts.sh
+
+      - if: steps.stamp.outputs.changed == '1'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Add dates to new posts"
+          git push
