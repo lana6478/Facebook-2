@@ -38,7 +38,7 @@
           <div class="boxhead" id="account-head">Log In</div>
 
           <form id="login-form" class="form">
-            <label>Email: <input type="email" name="email" required autocomplete="email"></label>
+            <label>Username: <input type="text" name="username" required autocomplete="username" autocapitalize="off"></label>
             <label>Password: <input type="password" name="password" required autocomplete="current-password"></label>
             <div class="form-row">
               <button type="submit">Login</button>
@@ -47,9 +47,9 @@
           </form>
 
           <form id="signup-form" class="form" hidden>
-            <label>Name: <input type="text" name="name" required maxlength="50" autocomplete="name"></label>
-            <label>Email: <input type="email" name="email" required autocomplete="email"></label>
+            <label>Username: <input type="text" name="username" required minlength="3" maxlength="30" pattern="[A-Za-z0-9_]+" title="3–30 letters, numbers or _" autocomplete="username" autocapitalize="off"></label>
             <label>Password: <input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
+            <p class="hint">No email needed. There's no password reset, so remember it!</p>
             <div class="form-row">
               <button type="submit">Register Now!</button>
               or <a href="#" data-show="login-form">log in</a>

@@ -15,6 +15,7 @@ Cloudflare account. Tested with PocketBase 0.31.
    theblogbook/
      pocketbase(.exe)
      pb_migrations/1700000000_create_posts.js
+     pb_migrations/1700000001_username_login.js
    ```
 
 ## 2. First run
@@ -29,6 +30,7 @@ In a terminal in that folder:
 (On Windows use `.\pocketbase.exe` instead of `./pocketbase`.)
 
 - The first `serve` creates the `posts` table and permission rules automatically.
+- People sign up with just a username and password — no email is collected or stored.
 - `--origins` means only your GitHub Pages site can use the server from a browser.
 - The admin dashboard is at http://127.0.0.1:8090/_/ — log in with the superuser above.
   From there you can delete posts or ban users.

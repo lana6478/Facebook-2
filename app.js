@@ -86,7 +86,7 @@ function showAccount() {
   $('logged-in').hidden = !loggedIn;
   $('composer').hidden = !loggedIn;
   $('account-head').textContent = loggedIn ? 'My Account' : 'Log In';
-  if (loggedIn) $('me-name').textContent = pb.authStore.record?.name || pb.authStore.record?.email;
+  if (loggedIn) $('me-name').textContent = pb.authStore.record?.name;
 }
 
 function message(text, isError) {
@@ -111,10 +111,10 @@ function setupAccount() {
     e.preventDefault();
     const f = e.target;
     try {
-      await pb.collection('users').authWithPassword(f.email.value, f.password.value);
+      await pb.collection('users').authWithPassword(f.username.value.trim(), f.password.value);
       f.reset(); message(''); showAccount(); loadWall();
     } catch {
-      message('Wrong email or password.', true);
+      message('Wrong username or password.', true);
     }
   });
 
@@ -123,15 +123,15 @@ function setupAccount() {
     const f = e.target;
     try {
       await pb.collection('users').create({
-        name: f.name.value.trim(), email: f.email.value,
+        name: f.username.value.trim(),
         password: f.password.value, passwordConfirm: f.password.value,
       });
-      await pb.collection('users').authWithPassword(f.email.value, f.password.value);
+      await pb.collection('users').authWithPassword(f.username.value.trim(), f.password.value);
       f.reset(); message('Welcome! You can write on the Wall now.'); showAccount(); loadWall();
     } catch (err) {
       const d = err?.response?.data || {};
       const detail = Object.entries(d).map(([k, v]) => `${k}: ${v.message}`).join(' ');
-      message('Couldn\'t register. ' + (detail || 'That email may already be in use.'), true);
+      message('Couldn\'t register. ' + (d.name ? 'That username is taken or not allowed.' : (detail || 'Try a different username.')), true);
     }
   });
 
