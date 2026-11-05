@@ -16,6 +16,7 @@ Cloudflare account. Tested with PocketBase 0.31.
      pocketbase(.exe)
      pb_migrations/1700000000_create_posts.js
      pb_migrations/1700000001_username_login.js
+     pb_migrations/1700000002_profiles_groups.js
    ```
 
 ## 2. First run

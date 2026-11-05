@@ -25,8 +25,21 @@ Turn on GitHub Pages (Settings → Pages → Deploy from branch → `main` / roo
 
 The Wall reads the posts folder from GitHub, so new posts show up once they're committed to `main`.
 
-## Accounts and posting from the page (optional)
+## Accounts, groups and profiles
 
-The `pocketbase` branch adds sign-up, login and a "Write something…" box, backed by a
-PocketBase server you run yourself. Setup steps are in [`server/SETUP.md`](server/SETUP.md).
-Until `SERVER_URL` is set in `config.js`, the site works exactly as before.
+The site needs a PocketBase server you run yourself (set `SERVER_URL` in `config.js`;
+setup steps are in [`server/SETUP.md`](server/SETUP.md)). With it:
+
+- **Login screen first** — nothing is visible until you log in or register (username + password, no email).
+- **The Wall** — one central wall everyone can write on (raw HTML, cleaned before it's shown),
+  plus the post files from `posts/`.
+- **Profiles** — everyone fills in and edits their own profile and uploads a picture.
+- **Chat groups** — anyone can create a group and becomes its admin; only people the group admin
+  invites can see it. Members can leave; the group admin can remove people, delete messages,
+  rename or delete the group. Messages appear live.
+- **Site admins** — accounts with *is_admin* ticked (in the PocketBase dashboard, or by another
+  site admin on the Admin page) can see and change everything: every profile, group and message,
+  set new passwords and delete accounts.
+
+Note: the `posts/` folder is part of a public GitHub repo, so those post files can be read by
+anyone on GitHub even though the site asks for a login.

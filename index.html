@@ -9,33 +9,27 @@
 <body>
   <div id="page">
     <div id="header">
-      <a href="index.html" class="logo">[ theblogbook ]</a>
+      <a href="#/wall" class="logo">[ theblogbook ]</a>
+      <div id="nav" hidden>
+        <a href="#/wall">wall</a>
+        <a href="#/groups">groups</a>
+        <a href="#/profile" id="nav-profile">my profile</a>
+        <a href="#/admin" id="nav-admin" hidden>admin</a>
+        <a href="#" id="logout">logout</a>
+      </div>
     </div>
 
     <div id="body">
-      <div id="content">
-        <div class="box">
-          <div class="boxhead">Profile</div>
-          <div class="profile">
-            <div class="photo">
-              <img src="img/profile.svg" alt="Profile picture">
-            </div>
-            <table class="info">
-              <tr><th>Name:</th><td id="p-name">Your Name</td></tr>
-              <tr><th>Member Since:</th><td>February 4, 2004</td></tr>
-              <tr><th>Last Update:</th><td id="p-updated">—</td></tr>
-              <tr><th>School:</th><td>Your University '07</td></tr>
-              <tr><th>Status:</th><td>Student</td></tr>
-              <tr><th>Concentration:</th><td>Computer Science</td></tr>
-              <tr><th>Residence:</th><td>Dorm Room 33</td></tr>
-              <tr><th>Looking For:</th><td>Friendship, Whatever I can get</td></tr>
-              <tr><th>Relationship Status:</th><td>It's Complicated</td></tr>
-            </table>
-          </div>
+      <!-- Shown until you log in: nothing else on the site is visible before that. -->
+      <div id="login-screen" hidden>
+        <div class="welcome">
+          <h1>[ Welcome to theblogbook ]</h1>
+          <p>theblogbook is an online directory that connects people through social networks at colleges.</p>
+          <p>You need to log in to see the Wall, profiles and groups.</p>
         </div>
 
-        <div class="box" id="account" hidden>
-          <div class="boxhead" id="account-head">Log In</div>
+        <div class="box login-box">
+          <div class="boxhead" id="login-head">Log In</div>
 
           <form id="login-form" class="form">
             <label>Username: <input type="text" name="username" required autocomplete="username" autocapitalize="off"></label>
@@ -49,29 +43,20 @@
           <form id="signup-form" class="form" hidden>
             <label>Username: <input type="text" name="username" required minlength="3" maxlength="30" pattern="[A-Za-z0-9_]+" title="3–30 letters, numbers or _" autocomplete="username" autocapitalize="off"></label>
             <label>Password: <input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
-            <p class="hint">No email needed. There's no password reset, so remember it!</p>
+            <p class="hint">No email needed. There's no password reset, so remember it! (An admin can reset it for you.)</p>
             <div class="form-row">
               <button type="submit">Register Now!</button>
               or <a href="#" data-show="login-form">log in</a>
             </div>
           </form>
 
-          <div id="logged-in" class="form" hidden>
-            <div class="form-row">Logged in as <b id="me-name"></b> [ <a href="#" id="logout">logout</a> ]</div>
-          </div>
-
-          <p id="account-msg" class="msg" hidden></p>
-        </div>
-
-        <div class="box">
-          <div class="boxhead">The Wall <span id="post-count"></span></div>
-          <form id="composer" class="composer" hidden>
-            <textarea name="body" rows="3" maxlength="5000" required placeholder="Write something… (HTML allowed)"></textarea>
-            <div class="form-row"><button type="submit">Post</button></div>
-          </form>
-          <div id="wall"><p class="loading">Loading posts…</p></div>
+          <p id="login-msg" class="msg" hidden></p>
         </div>
       </div>
+
+      <!-- Everything below is filled in by app.js once you're logged in. -->
+      <div id="view" hidden></div>
+      <p id="no-server" class="error" hidden>The site isn't connected to a server yet (SERVER_URL in config.js).</p>
     </div>
 
     <div id="footer">
