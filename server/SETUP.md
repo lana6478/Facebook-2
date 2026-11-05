@@ -6,13 +6,13 @@ Cloudflare account. Tested with PocketBase 0.31.
 
 ## 1. Put PocketBase on the mini PC
 
-1. Make a folder, e.g. `C:\blogbook` (Windows) or `~/blogbook` (Linux).
+1. Make a folder, e.g. `C:\theblogbook` (Windows) or `~/theblogbook` (Linux).
 2. Download PocketBase from https://github.com/pocketbase/pocketbase/releases
    — pick `windows_amd64.zip` or `linux_amd64.zip` (`linux_arm64` for ARM boards) — and unzip
    `pocketbase` / `pocketbase.exe` into that folder.
 3. Copy this repo's `server/pb_migrations` folder into the same folder, so you have:
    ```
-   blogbook/
+   theblogbook/
      pocketbase(.exe)
      pb_migrations/1700000000_create_posts.js
    ```
@@ -51,12 +51,12 @@ It prints a `https://something.trycloudflare.com` address — use that in step 5
 **Permanent (needs a domain on Cloudflare):**
 ```bash
 cloudflared tunnel login
-cloudflared tunnel create blogbook
-cloudflared tunnel route dns blogbook wall.yourdomain.com
+cloudflared tunnel create theblogbook
+cloudflared tunnel route dns theblogbook wall.yourdomain.com
 ```
 Then create `config.yml` in cloudflared's folder (`~/.cloudflared/` or `C:\Users\<you>\.cloudflared\`):
 ```yaml
-tunnel: blogbook
+tunnel: theblogbook
 credentials-file: <the .json file the create command printed>
 ingress:
   - hostname: wall.yourdomain.com
@@ -69,26 +69,26 @@ Install `cloudflared` from https://developers.cloudflare.com/cloudflare-one/conn
 
 ## 4. Keep PocketBase running after restarts
 
-**Linux** — create `/etc/systemd/system/blogbook.service`:
+**Linux** — create `/etc/systemd/system/theblogbook.service`:
 ```ini
 [Unit]
-Description=blogbook PocketBase
+Description=theblogbook PocketBase
 After=network.target
 
 [Service]
-WorkingDirectory=/home/<you>/blogbook
-ExecStart=/home/<you>/blogbook/pocketbase serve --http=127.0.0.1:8090 --origins=https://lana6478.github.io
+WorkingDirectory=/home/<you>/theblogbook
+ExecStart=/home/<you>/theblogbook/pocketbase serve --http=127.0.0.1:8090 --origins=https://lana6478.github.io
 Restart=always
 User=<you>
 
 [Install]
 WantedBy=multi-user.target
 ```
-then `sudo systemctl enable --now blogbook`.
+then `sudo systemctl enable --now theblogbook`.
 
 **Windows** — Task Scheduler → Create Task → trigger "At startup", action
-`C:\blogbook\pocketbase.exe` with arguments
-`serve --http=127.0.0.1:8090 --origins=https://lana6478.github.io`, start in `C:\blogbook`,
+`C:\theblogbook\pocketbase.exe` with arguments
+`serve --http=127.0.0.1:8090 --origins=https://lana6478.github.io`, start in `C:\theblogbook`,
 and tick "Run whether user is logged on or not".
 
 ## 5. Switch the site on
