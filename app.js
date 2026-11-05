@@ -4,7 +4,11 @@
 // Optional first line of a post, to set its date and author:
 //   <!-- date: 2004-02-10 18:00 | author: You -->
 
-const REPO = 'lana6478/Facebook-2';
+// Works out the repo from the site's own address (user.github.io/repo), so renaming
+// the repo on GitHub doesn't break anything. Falls back to this when viewed elsewhere.
+const REPO = (location.hostname.endsWith('.github.io') && location.pathname.split('/')[1])
+  ? `${location.hostname.split('.')[0]}/${location.pathname.split('/')[1]}`
+  : 'lana6478/blogbook';
 const BRANCH = 'main';
 
 async function loadWall() {
