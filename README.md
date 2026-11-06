@@ -43,3 +43,8 @@ setup steps are in [`server/SETUP.md`](server/SETUP.md)). With it:
 
 Note: the `posts/` folder is part of a public GitHub repo, so those post files can be read by
 anyone on GitHub even though the site asks for a login.
+
+## After changing app.js, style.css or config.js
+
+Bump the `?v=` number on their lines in `index.html` (e.g. `20261106a` → `20261106b`),
+otherwise phones may keep using the old copy for a while.
