@@ -62,6 +62,7 @@ async function route() {
       case 'groups': await groupsPage(live); break;
       case 'group': await groupPage(id, live); break;
       case 'admin': await adminPage(live); break;
+      case 'help': helpPage(); break;
       default: await wallPage(live);
     }
   } catch (err) {
@@ -178,7 +179,7 @@ async function wallPage(live) {
       <div class="boxhead">The Wall <span id="post-count"></span></div>
       <form id="composer" class="composer">
         <textarea name="body" rows="3" maxlength="5000" required placeholder="Write something on the Wall… (HTML required)"></textarea>
-        <div class="form-row"><button type="submit">Post</button></div>
+        <div class="form-row"><button type="submit">Post</button> <a href="#/help" class="help-link">How do I format my post?</a></div>
       </form>
       <div id="wall"><p class="loading">Loading posts…</p></div>
     </div>`;
@@ -384,6 +385,70 @@ async function editProfilePage(id, live) {
   });
 }
 
+// ---------- Help: how to format posts ----------
+
+// Each example shows the HTML to type, then what it looks like (run through the same
+// cleaning as real posts, so what you see here is exactly what a post would show).
+const HELP_SECTIONS = [
+  ['Starting a new line', 'HTML ignores the Enter key, so use <code>&lt;br&gt;</code> for a new line.',
+   'First line<br>\nSecond line<br>\nThird line'],
+  ['Paragraphs', 'Put each paragraph inside <code>&lt;p&gt;</code> … <code>&lt;/p&gt;</code> to get a gap between them.',
+   '<p>This is the first paragraph.</p>\n<p>This is the second one.</p>'],
+  ['Bold, italic, underline, crossed out', '',
+   '<b>bold</b> <i>italic</i> <u>underlined</u> <del>crossed out</del>'],
+  ['Headings', '',
+   '<h2>Party this Friday!</h2>\n<h3>Room 33, 9pm</h3>'],
+  ['Lists', '<code>&lt;ul&gt;</code> for bullet points, <code>&lt;ol&gt;</code> for a numbered list.',
+   '<ul>\n  <li>Bring snacks</li>\n  <li>Bring music</li>\n</ul>\n<ol>\n  <li>Numbered one</li>\n  <li>Numbered two</li>\n</ol>'],
+  ['Links', '',
+   '<a href="https://www.wikipedia.org">Click here</a>'],
+  ['Pictures', 'Use the address of a picture that\'s already online. <code>width</code> sets its size.',
+   '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png" width="150">'],
+  ['Colours and sizes', '',
+   '<span style="color: red;">Red text</span>\n<span style="font-size: 20px;">Big text</span>\n<span style="background: yellow;">Highlighted</span>\n<mark>Also highlighted</mark>'],
+  ['A dividing line', '',
+   'Before<hr>After'],
+  ['A quote', '',
+   '<blockquote>"I\'m not a bad guy." — someone, probably</blockquote>'],
+  ['A hidden spoiler', 'Opens when someone clicks it.',
+   '<details>\n  <summary>Click to see the answer</summary>\n  It was the roommate all along.\n</details>'],
+  ['A small table', '',
+   '<table border="1" cellpadding="4">\n  <tr><th>Name</th><th>Dorm</th></tr>\n  <tr><td>Sam</td><td>Kirkland</td></tr>\n  <tr><td>Alex</td><td>Eliot</td></tr>\n</table>'],
+  ['Putting it all together', '',
+   '<h3>Weekend plans</h3>\n<p>Hey everyone, <b>don\'t forget</b>:</p>\n<ul>\n  <li>Friday – <span style="color: blue;">movie night</span></li>\n  <li>Saturday – study group <i>(ugh)</i></li>\n</ul>\n<p>See you there!<br>— Sam</p>'],
+];
+
+function helpPage() {
+  view.innerHTML = `
+    <div class="box">
+      <div class="boxhead">How to Format Your Posts</div>
+      <p class="pad">Wall posts and group messages are written in <b>HTML</b>. Plain text works for a
+        one-line message, but for new lines, bold, links, pictures and more you use the tags below.
+        Copy an example, paste it into the box, and change the words.</p>
+      <p class="pad hint">Scripts, forms and anything that covers the page are removed automatically,
+        so nobody can break the site for everyone else.</p>
+    </div>
+    ${HELP_SECTIONS.map(([title, note, code], i) => `
+      <div class="box">
+        <div class="boxhead">${esc(title)}</div>
+        ${note ? `<p class="pad">${note}</p>` : ''}
+        <div class="help-example">
+          <div class="help-label">Type this: <a href="#" data-copy="${i}">copy</a></div>
+          <pre class="help-code">${esc(code)}</pre>
+          <div class="help-label">It looks like this:</div>
+          <div class="post-body help-result">${clean(code)}</div>
+        </div>
+      </div>`).join('')}
+    <p class="pad"><a href="#/wall">« Back to the Wall</a></p>`;
+
+  view.querySelectorAll('[data-copy]').forEach(a => a.addEventListener('click', async (e) => {
+    e.preventDefault();
+    try { await navigator.clipboard.writeText(HELP_SECTIONS[a.dataset.copy][2]); a.textContent = 'copied!'; }
+    catch { a.textContent = 'select the text to copy'; }
+    setTimeout(() => { a.textContent = 'copy'; }, 1500);
+  }));
+}
+
 // ---------- Chat groups ----------
 
 async function groupsPage(live) {
@@ -441,7 +506,7 @@ async function groupPage(id, live) {
         <div id="messages"><p class="loading">Loading messages…</p></div>
         <form id="say" class="composer" hidden>
           <textarea name="body" rows="2" maxlength="5000" required placeholder="Write a message… (HTML required, Ctrl+Enter sends)"></textarea>
-          <div class="form-row"><button type="submit">Send</button></div>
+          <div class="form-row"><button type="submit">Send</button> <a href="#/help" class="help-link">Formatting help</a></div>
         </form>
         <p id="not-member" class="hint pad" hidden>You're looking at this group as a site admin. You're not a member, so you can't write here.</p>
       </div>

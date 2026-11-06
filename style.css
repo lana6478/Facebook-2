@@ -121,3 +121,14 @@ button:disabled { opacity: .6; }
   .admin-table th:nth-child(3), .admin-table td:nth-child(3) { display: none; }
   .group-side { flex: 1 1 100%; }
 }
+
+/* Help page */
+.help-link { margin-left: 8px; }
+.help-example { padding: 0 10px 10px; }
+.help-label { color: #808080; margin: 6px 0 3px; }
+.help-code {
+  margin: 0; padding: 6px 8px; background: #f7f7f7; border: 1px solid #d8dfea;
+  font: 12px/1.4 Menlo, Consolas, monospace; white-space: pre-wrap; word-break: break-word;
+}
+.help-result { padding: 6px 8px; border: 1px dashed #bdc7d8; }
+.post-body blockquote { margin: 4px 0 4px 10px; padding-left: 8px; border-left: 3px solid #d8dfea; color: #555; }
