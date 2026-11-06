@@ -226,7 +226,7 @@ async function loadServerPosts() {
     author: r.expand?.author,
     authorName: r.expand?.author?.name || 'Someone',
     date: pbDate(r.created),
-    html: DOMPurify.sanitize(r.body),
+    html: clean(r.body),
   }));
 }
 
@@ -305,7 +305,7 @@ async function profilePage(id, live) {
       ${posts.items.map(p => `
         <div class="post"><div class="post-main">
           <div class="post-meta">${formatDate(pbDate(p.created))}</div>
-          <div class="post-body">${DOMPurify.sanitize(p.body)}</div>
+          <div class="post-body">${clean(p.body)}</div>
         </div></div>`).join('') || '<p class="loading">Nothing yet.</p>'}
     </div>`;
 }
@@ -504,7 +504,7 @@ async function groupPage(id, live) {
         <div class="post-main">
           <div class="post-meta">${userLink(m.expand?.author)} at ${formatDate(pbDate(m.created))}
             ${m.author === me().id || isAdmin() ? `[ <a href="#" data-delete="${m.id}">delete</a> ]` : ''}</div>
-          <div class="post-body">${DOMPurify.sanitize(m.body)}</div>
+          <div class="post-body">${clean(m.body)}</div>
         </div>
       </div>`).join('') || '<p class="loading">No messages yet. Say hello!</p>';
     if (nearBottom || !loadMessages.done) box.scrollTop = box.scrollHeight;
@@ -707,6 +707,15 @@ function formatDate(d, dayOnly) {
   return dt.toLocaleString('en-US', dayOnly
     ? { month: 'long', day: 'numeric', year: 'numeric' }
     : { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
+// Cleans someone's HTML before it's shown. Formatting, links and pictures work; scripts,
+// <style> and anything form-like (fake "log in again" boxes) are removed.
+function clean(html) {
+  return DOMPurify.sanitize(html, {
+    FORBID_TAGS: ['style', 'form', 'input', 'button', 'textarea', 'select', 'option', 'iframe', 'object', 'embed'],
+    FORBID_ATTR: ['formaction', 'form'],
+  });
 }
 
 function esc(s) {

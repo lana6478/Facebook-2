@@ -39,6 +39,8 @@ a:hover { text-decoration: underline; }
 .post:last-child { border-bottom: 0; }
 .post-meta { color: #808080; margin-bottom: 4px; }
 .post-meta b { color: #3b5998; }
+/* Keeps each post inside its own box: nothing in a post can cover the rest of the page. */
+.post-body { position: relative; overflow: hidden; contain: paint; }
 .post-body img { max-width: 100%; }
 .post-body p { margin: 4px 0; }
 .loading, .error { padding: 10px; color: #808080; }
