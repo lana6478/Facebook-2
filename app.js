@@ -544,6 +544,27 @@ async function groupPage(id, live) {
 
   let myMembership = null;
   let newestMessage = null;
+  let memberList = [];
+  const readAt = {};   // site admins only: user id → when they last read this group
+
+  async function loadReads() {
+    if (!isAdmin()) return;
+    const rows = await pb.collection('seen').getFullList({ filter: pb.filter('key = {:id}', { id }) });
+    for (const k in readAt) delete readAt[k];
+    rows.forEach(r => { readAt[r.user] = r.at; });
+  }
+
+  // "Seen by …" under a message, for site admins.
+  function seenLine(m) {
+    if (!isAdmin()) return '';
+    const others = memberList.filter(x => x.user !== m.author && x.expand?.user);
+    if (!others.length) return '';
+    const readers = others.filter(x => readAt[x.user] >= m.created).map(x => x.expand.user.name);
+    const text = !readers.length ? 'Not seen by anyone yet'
+      : readers.length === others.length ? 'Seen by everyone'
+      : 'Seen by ' + readers.join(', ');
+    return `<div class="seen-by" title="Only site admins can see this">${esc(text)}</div>`;
+  }
 
   async function loadMembers() {
     const list = await pb.collection('members').getFullList({
@@ -551,6 +572,7 @@ async function groupPage(id, live) {
     });
     if (!live()) return;
     myMembership = list.find(m => m.user === me().id) || null;
+    memberList = list;
     if (!myMembership && !isAdmin()) return go('#/groups');   // you were removed
     $('say').hidden = !myMembership;
     $('not-member').hidden = !!myMembership;
@@ -577,6 +599,7 @@ async function groupPage(id, live) {
           <div class="post-meta">${userLink(m.expand?.author)} at ${formatDate(pbDate(m.created))}
             ${m.author === me().id || isAdmin() ? `[ <a href="#" data-delete="${m.id}">delete</a> ]` : ''}</div>
           <div class="post-body">${clean(m.body)}</div>
+          ${seenLine(m)}
         </div>
       </div>`).join('') || '<p class="loading">No messages yet. Say hello!</p>';
     if (nearBottom || !loadMessages.done) box.scrollTop = box.scrollHeight;
@@ -585,10 +608,16 @@ async function groupPage(id, live) {
     if (myMembership) markSeen(id, latest(newestMessage, myMembership.created));
   }
 
-  await Promise.all([loadMembers(), loadMessages()]);
+  await Promise.all([loadMembers(), loadReads()]);
+  await loadMessages();
   if (myMembership) markSeen(id, latest(newestMessage, myMembership.created));
   listen('messages', { filter: pb.filter('group = {:id}', { id }) }, loadMessages, live);
-  listen('members', { filter: pb.filter('group = {:id}', { id }) }, loadMembers, live);
+  listen('members', { filter: pb.filter('group = {:id}', { id }) },
+    async () => { await loadMembers(); if (isAdmin()) loadMessages(); }, live);
+  if (isAdmin()) {
+    listen('seen', { filter: pb.filter('key = {:id}', { id }) },
+      async () => { await loadReads(); loadMessages(); }, live);
+  }
 
   const say = $('say');
   say.addEventListener('submit', async (e) => {

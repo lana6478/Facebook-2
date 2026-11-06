@@ -144,3 +144,6 @@ button:disabled { opacity: .6; }
   flex: none; width: 32px; text-align: center; font-weight: bold; color: #fff;
   background: #6d84b4; border: 1px solid #3b5998; line-height: 30px;
 }
+
+/* Read receipts (site admins only) */
+.seen-by { margin-top: 3px; color: #8a9bbf; font-size: 10px; }
