@@ -547,16 +547,22 @@ async function groupPage(id, live) {
   let memberList = [];
   const readAt = {};   // site admins only: user id → when they last read this group
 
+  // Never lets a problem here stop the group from opening (e.g. the server hasn't
+  // been updated with the read-receipts file yet) — the "Seen by" lines just don't show.
+  let readsWork = false;
   async function loadReads() {
     if (!isAdmin()) return;
-    const rows = await pb.collection('seen').getFullList({ filter: pb.filter('key = {:id}', { id }) });
-    for (const k in readAt) delete readAt[k];
-    rows.forEach(r => { readAt[r.user] = r.at; });
+    try {
+      const rows = await pb.collection('seen').getFullList({ filter: pb.filter('key = {:id}', { id }) });
+      for (const k in readAt) delete readAt[k];
+      rows.forEach(r => { readAt[r.user] = r.at; });
+      readsWork = true;
+    } catch { readsWork = false; }
   }
 
   // "Seen by …" under a message, for site admins.
   function seenLine(m) {
-    if (!isAdmin()) return '';
+    if (!isAdmin() || !readsWork) return '';
     const others = memberList.filter(x => x.user !== m.author && x.expand?.user);
     if (!others.length) return '';
     const readers = others.filter(x => readAt[x.user] >= m.created).map(x => x.expand.user.name);
@@ -826,7 +832,13 @@ function showBadges() {
 }
 
 async function notificationsPage(live) {
-  await countNotifications();
+  try { await countNotifications(); }
+  catch {
+    if (!live()) return;
+    view.innerHTML = `<div class="box"><div class="boxhead">Notifications</div>
+      <p class="loading">Notifications aren't switched on on the server yet.</p></div>`;
+    return;
+  }
   if (!live()) return;
 
   // "You were added to…" notices stay listed while you're on this page (so you can
