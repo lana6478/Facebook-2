@@ -6,6 +6,7 @@
 //   #/profile/<id>/edit    edit a profile (your own, or anyone's if you're a site admin)
 //   #/groups               your chat groups + make a new one
 //   #/group/<id>           one chat group
+//   #/notifications        what's new: added to a group, new messages, new Wall posts
 //   #/admin                site admins only: every user and every group
 //
 // Posts and messages are written in raw HTML. Other people's HTML is always cleaned with
@@ -47,8 +48,9 @@ async function route() {
   cleanup = [];
 
   if (!pb) { $('no-server').hidden = false; return; }
-  if (!pb.authStore.isValid) return showLogin();
+  if (!pb.authStore.isValid) { stopNotifications(); return showLogin(); }
   showApp();
+  startNotifications();
 
   const live = () => rid === routeId;
   const [page, id, extra] = location.hash.replace(/^#\/?/, '').split('/');
@@ -63,6 +65,7 @@ async function route() {
       case 'group': await groupPage(id, live); break;
       case 'admin': await adminPage(live); break;
       case 'help': helpPage(); break;
+      case 'notifications': await notificationsPage(live); break;
       default: await wallPage(live);
     }
   } catch (err) {
@@ -226,6 +229,7 @@ async function loadServerPosts() {
     id: r.id,
     author: r.expand?.author,
     authorName: r.expand?.author?.name || 'Someone',
+    created: r.created,
     date: pbDate(r.created),
     html: clean(r.body),
   }));
@@ -237,6 +241,7 @@ async function loadWall(live) {
   const [files, server] = await Promise.allSettled([wallFiles || loadFilePosts(), loadServerPosts()]);
   if (!live() || !$('wall')) return;
   if (files.status === 'fulfilled') wallFiles = files.value;
+  if (server.status === 'fulfilled') markSeen('wall', server.value[0]?.created);   // newest first
 
   const posts = [
     ...(files.status === 'fulfilled' ? files.value : []),
@@ -463,7 +468,7 @@ async function groupsPage(live) {
       <div class="boxhead">My Groups (${groups.length})</div>
       ${groups.map(g => `
         <div class="row">
-          <a href="#/group/${g.id}"><b>${esc(g.name)}</b></a>
+          <a href="#/group/${g.id}"><b>${esc(g.name)}</b></a><span class="badge" data-unread-group="${g.id}" hidden></span>
           <span class="dim">${g.owner === me().id ? 'you run this group' : 'run by ' + esc(g.expand?.owner?.name || '?')}</span>
         </div>`).join('') || '<p class="loading">You\'re not in any groups yet. Make one below, or ask someone to invite you.</p>'}
     </div>
@@ -490,6 +495,7 @@ async function groupsPage(live) {
     });
   });
 
+  showBadges();
   // Someone adds you to a group (or removes you) → redraw the list.
   listen('members', { filter: pb.filter('user = {:me}', { me: me().id }) }, route, live);
 }
@@ -537,6 +543,7 @@ async function groupPage(id, live) {
     </div>`;
 
   let myMembership = null;
+  let newestMessage = null;
 
   async function loadMembers() {
     const list = await pb.collection('members').getFullList({
@@ -574,9 +581,12 @@ async function groupPage(id, live) {
       </div>`).join('') || '<p class="loading">No messages yet. Say hello!</p>';
     if (nearBottom || !loadMessages.done) box.scrollTop = box.scrollHeight;
     loadMessages.done = true;
+    newestMessage = res.items[res.items.length - 1]?.created;   // (list was reversed above)
+    if (myMembership) markSeen(id, latest(newestMessage, myMembership.created));
   }
 
   await Promise.all([loadMembers(), loadMessages()]);
+  if (myMembership) markSeen(id, latest(newestMessage, myMembership.created));
   listen('messages', { filter: pb.filter('group = {:id}', { id }) }, loadMessages, live);
   listen('members', { filter: pb.filter('group = {:id}', { id }) }, loadMembers, live);
 
@@ -651,6 +661,185 @@ async function groupPage(id, live) {
     try { await pb.collection('members').delete(myMembership.id); go('#/groups'); }
     catch (err) { alert('Couldn\'t leave. ' + errText(err)); }
   });
+}
+
+// ---------- Notifications ----------
+//
+// Nothing is sent anywhere: the site counts what's new since you last looked.
+// "Last looked" times live in the private "seen" collection: one row per thing
+// ("wall", "notifs", or a group's id). Times come from the server's own records,
+// so a phone with the wrong clock can't mess them up.
+
+const seen = {};             // key → seen record
+let seenLoaded = false;
+let notif = { wall: 0, groups: {}, groupNames: {}, added: [], total: 0 };
+let notifStops = [];         // live updates for the counters (separate from page ones)
+let notifStarting = false;
+let notifTimer = null;
+let onNotifChange = null;    // the notifications page redraws itself through this
+
+function latest(...dates) {
+  return dates.filter(Boolean).sort().pop();
+}
+
+function startNotifications() {
+  if (notifStops.length || notifStarting) return;
+  notifStarting = true;
+  const meId = me().id;
+  Promise.all([
+    pb.collection('posts').subscribe('*', refreshNotifications),
+    pb.collection('messages').subscribe('*', refreshNotifications),
+    pb.collection('members').subscribe('*', refreshNotifications, { filter: pb.filter('user = {:me}', { me: meId }) }),
+  ]).then(stops => {
+    if (pb.authStore.isValid) notifStops = stops; else stops.forEach(stop => stop());
+  }).catch(() => {}).finally(() => { notifStarting = false; });
+  refreshNotifications();
+}
+
+function stopNotifications() {
+  notifStops.forEach(stop => stop());
+  notifStops = [];
+  clearTimeout(notifTimer);
+  for (const k in seen) delete seen[k];
+  seenLoaded = false;
+  notif = { wall: 0, groups: {}, groupNames: {}, added: [], total: 0 };
+  showBadges();
+}
+
+async function loadSeen() {
+  const rows = await pb.collection('seen').getFullList({ filter: pb.filter('user = {:me}', { me: me().id }) });
+  for (const k in seen) delete seen[k];
+  rows.forEach(r => { seen[r.key] = r; });
+  seenLoaded = true;
+}
+
+// Remember that you've seen everything up to "at" (a server timestamp).
+async function markSeen(key, at) {
+  if (!at || !pb.authStore.isValid) return;
+  try {
+    if (!seenLoaded) await loadSeen();
+    const row = seen[key];
+    if (row && row.at >= at) return;
+    seen[key] = row
+      ? await pb.collection('seen').update(row.id, { at })
+      : await pb.collection('seen').create({ user: me().id, key, at });
+  } catch {
+    await loadSeen().catch(() => {});   // e.g. another tab saved it first
+  }
+  refreshNotifications();
+}
+
+function refreshNotifications() {
+  clearTimeout(notifTimer);
+  notifTimer = setTimeout(() => countNotifications().catch(() => {}), 300);
+}
+
+async function countNotifications() {
+  if (!pb.authStore.isValid) return;
+  const meId = me().id;
+  if (!seenLoaded) await loadSeen();
+
+  const mine = await pb.collection('members').getFullList({
+    filter: pb.filter('user = {:me}', { me: meId }), expand: 'group,group.owner',
+  });
+  const myGroups = mine.filter(m => m.expand?.group);
+
+  // New Wall posts by other people.
+  const wallSince = seen.wall?.at || me().created;
+  const wall = await pb.collection('posts').getList(1, 1, {
+    filter: pb.filter('created > {:t} && author != {:me}', { t: wallSince, me: meId }), fields: 'id',
+  });
+
+  // New messages by other people, per group, since you last opened that group.
+  const groups = {};
+  if (myGroups.length) {
+    const since = myGroups.map(m => pb.filter('(group = {:g} && created > {:t})', {
+      g: m.group, t: seen[m.group]?.at || m.created,
+    }));
+    const unread = await pb.collection('messages').getList(1, 500, {
+      filter: `(${since.join(' || ')}) && ` + pb.filter('author != {:me}', { me: meId }),
+      fields: 'group', skipTotal: true,
+    });
+    unread.items.forEach(m => { groups[m.group] = (groups[m.group] || 0) + 1; });
+  }
+
+  // Groups someone else added you to, that you haven't looked at yet.
+  const notifsSince = seen.notifs?.at || me().created;
+  const added = myGroups.filter(m =>
+    m.expand.group.owner !== meId && m.created > notifsSince && !(seen[m.group]?.at >= m.created));
+
+  if (!pb.authStore.isValid || me().id !== meId) return;   // logged out while counting
+  const groupTotal = Object.values(groups).reduce((a, b) => a + b, 0);
+  notif = {
+    wall: wall.totalItems, groups, added,
+    groupNames: Object.fromEntries(myGroups.map(m => [m.group, m.expand.group.name])),
+    total: wall.totalItems + groupTotal + added.length,
+  };
+  showBadges();
+  onNotifChange?.();
+}
+
+function badge(el, n) {
+  if (!el) return;
+  el.hidden = !n;
+  el.textContent = n > 99 ? '99+' : String(n || '');
+}
+
+function showBadges() {
+  const groupTotal = Object.values(notif.groups).reduce((a, b) => a + b, 0);
+  badge($('badge-wall'), notif.wall);
+  badge($('badge-groups'), groupTotal + notif.added.length);
+  badge($('badge-notifs'), notif.total);
+  document.querySelectorAll('[data-unread-group]').forEach(el =>
+    badge(el, (notif.groups[el.dataset.unreadGroup] || 0) +
+              (notif.added.some(m => m.group === el.dataset.unreadGroup) ? 1 : 0)));
+  document.title = (notif.total ? `(${notif.total}) ` : '') + '[ theblogbook ]';
+}
+
+async function notificationsPage(live) {
+  await countNotifications();
+  if (!live()) return;
+
+  // "You were added to…" notices stay listed while you're on this page (so you can
+  // still click them), even though opening the page marks them as seen.
+  const addedHere = new Map(notif.added.map(m => [m.id, m]));
+
+  const draw = () => {
+    if (!live() || !$('notif-list')) return;
+    notif.added.forEach(m => addedHere.set(m.id, m));
+    const items = [
+      ...[...addedHere.values()].sort((a, b) => b.created.localeCompare(a.created)).map(m => `
+        <div class="row notif">
+          ${avatarImg(m.expand.group.expand?.owner, 'small')}
+          <span>You were added to <a href="#/group/${m.group}"><b>${esc(m.expand.group.name)}</b></a>
+            <span class="dim">(run by ${esc(m.expand.group.expand?.owner?.name || '?')}) · ${formatDate(pbDate(m.created))}</span></span>
+        </div>`),
+      ...Object.entries(notif.groups).map(([g, n]) => `
+        <div class="row notif">
+          <span class="notif-count">${n > 99 ? '99+' : n}</span>
+          <span>new message${n === 1 ? '' : 's'} in <a href="#/group/${g}"><b>${esc(notif.groupNames[g] || 'a group')}</b></a></span>
+        </div>`),
+      ...(notif.wall ? [`
+        <div class="row notif">
+          <span class="notif-count">${notif.wall > 99 ? '99+' : notif.wall}</span>
+          <span>new post${notif.wall === 1 ? '' : 's'} on <a href="#/wall"><b>the Wall</b></a></span>
+        </div>`] : []),
+    ];
+    $('notif-list').innerHTML = items.join('') ||
+      '<p class="loading">Nothing new. You\'re all caught up!</p>';
+  };
+
+  view.innerHTML = `
+    <div class="box">
+      <div class="boxhead">Notifications</div>
+      <div id="notif-list"></div>
+      <p class="hint pad">Message and Wall counts clear when you open the group or the Wall.</p>
+    </div>`;
+  draw();
+  onNotifChange = draw;
+  cleanup.push(() => { if (onNotifChange === draw) onNotifChange = null; });
+
+  markSeen('notifs', latest(...notif.added.map(m => m.created)));
 }
 
 // ---------- Site admin ----------

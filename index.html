@@ -6,15 +6,16 @@
   <title>[ theblogbook ]</title>
   <!-- The ?v= number makes browsers fetch fresh files after an update.
        Change it (on all three lines) whenever app.js, style.css or config.js change. -->
-  <link rel="stylesheet" href="style.css?v=20261106a">
+  <link rel="stylesheet" href="style.css?v=20261106b">
 </head>
 <body>
   <div id="page">
     <div id="header">
       <a href="#/wall" class="logo">[ theblogbook ]</a>
       <div id="nav" hidden>
-        <a href="#/wall">wall</a>
-        <a href="#/groups">groups</a>
+        <a href="#/wall">wall<span class="badge" id="badge-wall" hidden></span></a>
+        <a href="#/groups">groups<span class="badge" id="badge-groups" hidden></span></a>
+        <a href="#/notifications">notifications<span class="badge" id="badge-notifs" hidden></span></a>
         <a href="#/profile" id="nav-profile">my profile</a>
         <a href="#/help">help</a>
         <a href="#/admin" id="nav-admin" hidden>admin</a>
@@ -63,9 +64,9 @@
     </div>
 
   </div>
-  <script src="config.js?v=20261106a"></script>
+  <script src="config.js?v=20261106b"></script>
   <script src="lib/purify.min.js"></script>
   <script src="lib/pocketbase.umd.js"></script>
-  <script src="app.js?v=20261106a"></script>
+  <script src="app.js?v=20261106b"></script>
 </body>
 </html>

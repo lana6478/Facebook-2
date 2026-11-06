@@ -132,3 +132,15 @@ button:disabled { opacity: .6; }
 }
 .help-result { padding: 6px 8px; border: 1px dashed #bdc7d8; }
 .post-body blockquote { margin: 4px 0 4px 10px; padding-left: 8px; border-left: 3px solid #d8dfea; color: #555; }
+
+/* Notifications */
+.badge {
+  display: inline-block; min-width: 9px; margin-left: 4px; padding: 0 4px;
+  background: #d00; color: #fff; font-size: 10px; font-weight: bold; line-height: 14px;
+  text-align: center; border-radius: 2px; vertical-align: 1px;
+}
+.notif { display: flex; align-items: center; gap: 8px; }
+.notif-count {
+  flex: none; width: 32px; text-align: center; font-weight: bold; color: #fff;
+  background: #6d84b4; border: 1px solid #3b5998; line-height: 30px;
+}
