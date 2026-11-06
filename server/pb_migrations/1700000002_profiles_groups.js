@@ -109,8 +109,9 @@ migrate((app) => {
   messages.viewRule = messages.listRule;
   messages.createRule = `author = @request.auth.id && ${isMember("group")}`;
   messages.updateRule = `author = @request.auth.id && @request.body.author:isset = false && @request.body.group:isset = false`;
-  // Delete your own message; the group owner and site admins can delete any.
-  messages.deleteRule = `author = @request.auth.id || group.owner = @request.auth.id || ${ADMIN}`;
+  // Delete your own message; only site admins can delete other people's.
+  // (The group's owner runs the group, not the people in it.)
+  messages.deleteRule = `author = @request.auth.id || ${ADMIN}`;
   app.save(messages);
 }, (app) => {
   for (const name of ["messages", "members", "groups"]) {

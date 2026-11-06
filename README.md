@@ -35,8 +35,8 @@ setup steps are in [`server/SETUP.md`](server/SETUP.md)). With it:
   plus the post files from `posts/`.
 - **Profiles** — everyone fills in and edits their own profile and uploads a picture.
 - **Chat groups** — anyone can create a group and becomes its admin; only people the group admin
-  invites can see it. Members can leave; the group admin can remove people, delete messages,
-  rename or delete the group. Messages appear live.
+  invites can see it. Members can leave; the group admin can invite and remove people, rename
+  or delete the group — but can't delete other people's messages (only the site admin can). Messages appear live.
 - **Site admins** — accounts with *is_admin* ticked (in the PocketBase dashboard, or by another
   site admin on the Admin page) can see and change everything: every profile, group and message,
   set new passwords and delete accounts.

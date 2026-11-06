@@ -498,13 +498,12 @@ async function groupPage(id, live) {
       filter: pb.filter('group = {:id}', { id }), sort: '-created', expand: 'author',
     });
     if (!live()) return;
-    const canModerate = runsIt || isAdmin();
     box.innerHTML = res.items.reverse().map(m => `
       <div class="post">
         <a href="#/profile/${m.author}">${avatarImg(m.expand?.author, 'small')}</a>
         <div class="post-main">
           <div class="post-meta">${userLink(m.expand?.author)} at ${formatDate(pbDate(m.created))}
-            ${m.author === me().id || canModerate ? `[ <a href="#" data-delete="${m.id}">delete</a> ]` : ''}</div>
+            ${m.author === me().id || isAdmin() ? `[ <a href="#" data-delete="${m.id}">delete</a> ]` : ''}</div>
           <div class="post-body">${DOMPurify.sanitize(m.body)}</div>
         </div>
       </div>`).join('') || '<p class="loading">No messages yet. Say hello!</p>';
