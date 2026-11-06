@@ -177,7 +177,7 @@ async function wallPage(live) {
     <div class="box">
       <div class="boxhead">The Wall <span id="post-count"></span></div>
       <form id="composer" class="composer">
-        <textarea name="body" rows="3" maxlength="5000" required placeholder="Write something on the Wall… (HTML allowed)"></textarea>
+        <textarea name="body" rows="3" maxlength="5000" required placeholder="Write something on the Wall… (HTML required)"></textarea>
         <div class="form-row"><button type="submit">Post</button></div>
       </form>
       <div id="wall"><p class="loading">Loading posts…</p></div>
@@ -440,7 +440,7 @@ async function groupPage(id, live) {
         <div class="boxhead">${esc(group.name)}</div>
         <div id="messages"><p class="loading">Loading messages…</p></div>
         <form id="say" class="composer" hidden>
-          <textarea name="body" rows="2" maxlength="5000" required placeholder="Write a message… (HTML allowed, Ctrl+Enter sends)"></textarea>
+          <textarea name="body" rows="2" maxlength="5000" required placeholder="Write a message… (HTML required, Ctrl+Enter sends)"></textarea>
           <div class="form-row"><button type="submit">Send</button></div>
         </form>
         <p id="not-member" class="hint pad" hidden>You're looking at this group as a site admin. You're not a member, so you can't write here.</p>
